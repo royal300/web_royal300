@@ -215,10 +215,10 @@ export default function Builder() {
       <div className="absolute top-1/2 right-[20%] text-pink-400/10 float-slow"><PieChart className="w-20 h-20" /></div>
 
       {/* Main Centered Layout */}
-      <div className="flex-grow flex flex-col items-center justify-start sm:justify-center px-4 pt-2 pb-6 sm:py-8 relative z-10 w-full max-w-2xl mx-auto">
+      <div className="flex-grow flex flex-col items-center justify-start sm:justify-center px-4 pt-6 pb-6 sm:py-8 relative z-10 w-full max-w-2xl mx-auto">
         
         {/* Title Header */}
-        <div className="text-center mb-3 sm:mb-6 mt-[-15px] sm:mt-0">
+        <div className="text-center mb-3 sm:mb-6 mt-0">
           <img src="/logo.png" alt="Royal300 Logo" className="h-8 sm:h-16 mx-auto mb-1.5 sm:mb-3 drop-shadow-sm" />
           <h1 className="font-display text-2xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-[1.1] drop-shadow-sm">
             Build Your <br/>
