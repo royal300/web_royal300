@@ -295,14 +295,30 @@ export default function Admin() {
               <div>
                 <h3 className="font-display font-bold text-sm text-gray-500 uppercase tracking-wider mb-3">Selections</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {Object.entries(parsed || {}).map(([key, val]) => (
-                    <div key={key} className="glass-input p-3 rounded-xl flex flex-col justify-center">
-                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">{key}</span>
-                      <span className="font-display text-sm font-semibold text-gray-900">
-                        {typeof val === 'object' && val !== null ? JSON.stringify(val) : String(val)}
-                      </span>
-                    </div>
-                  ))}
+                  {Object.entries(parsed || {})
+                    .filter(([k]) => k !== "name" && k !== "phone")
+                    .map(([key, val]) => {
+                      let displayVal = "";
+                      if (key === "platforms" && typeof val === "object" && val !== null) {
+                        const selected = Object.keys(val).filter(k => (val as any)[k]);
+                        displayVal = selected.length > 0 ? selected.map(k => k.charAt(0).toUpperCase() + k.slice(1)).join(", ") : "None";
+                      } else if (typeof val === "boolean") {
+                        displayVal = val ? "Yes" : "No";
+                      } else if (typeof val === "object" && val !== null) {
+                        displayVal = JSON.stringify(val);
+                      } else {
+                        displayVal = String(val);
+                      }
+
+                      return (
+                        <div key={key} className="glass-input p-3 rounded-xl flex flex-col justify-center">
+                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">{key}</span>
+                          <span className="font-display text-sm font-semibold text-gray-900">
+                            {displayVal}
+                          </span>
+                        </div>
+                      );
+                  })}
                 </div>
               </div>
             </div>
