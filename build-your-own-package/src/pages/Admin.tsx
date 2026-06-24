@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Lock, LogOut, Settings, Users, FileText, Check, Eye, X } from "lucide-react";
+import { Lock, LogOut, Settings, Users, FileText, Check, Eye, X, Megaphone, Target, LineChart, Smartphone, PieChart } from "lucide-react";
 
 export default function Admin() {
   const [token, setToken] = useState<string | null>(localStorage.getItem("admin_token"));
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [activeTab, setActiveTab] = useState("prices");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [leads, setLeads] = useState<any[]>([]);
   const [enquiries, setEnquiries] = useState<any[]>([]);
-  
   const [selectedEnquiry, setSelectedEnquiry] = useState<any>(null);
 
   useEffect(() => {
@@ -22,25 +22,32 @@ export default function Admin() {
   const fetchData = async () => {
     try {
       if (activeTab === "prices") {
-        const res = await fetch("/api/prices");
-        setPrices(await res.json());
+        const res = await fetch("/api/prices", { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok) {
+          const data = await res.json();
+          setPrices(data);
+        }
       } else if (activeTab === "leads") {
         const res = await fetch("/api/leads", { headers: { Authorization: `Bearer ${token}` } });
-        setLeads(await res.json());
+        if (res.ok) {
+          const data = await res.json();
+          setLeads(Array.isArray(data) ? data : []);
+        }
       } else if (activeTab === "enquiries") {
         const res = await fetch("/api/enquiries", { headers: { Authorization: `Bearer ${token}` } });
-        setEnquiries(await res.json());
+        if (res.ok) {
+          const data = await res.json();
+          setEnquiries(Array.isArray(data) ? data : []);
+        }
       }
     } catch (err) {
       console.error(err);
-      if (err instanceof TypeError) {
-         // unauthorized possibly
-      }
     }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoggingIn(true);
     try {
       const res = await fetch("/api/login", {
         method: "POST",
@@ -52,11 +59,12 @@ export default function Admin() {
         localStorage.setItem("admin_token", data.token);
         setToken(data.token);
       } else {
-        alert("Invalid credentials");
+        alert("Invalid credentials or server error");
       }
     } catch (err) {
-      alert("Login failed");
+      alert("Login failed due to a network error.");
     }
+    setIsLoggingIn(false);
   };
 
   const handleLogout = () => {
@@ -78,179 +86,199 @@ export default function Admin() {
     }
   };
 
+  // Reusable Background Component
+  const AmbientBackground = () => (
+    <>
+      <div className="fixed top-10 left-[5%] text-[#a23957]/10 float-slow pointer-events-none"><Megaphone className="w-32 h-32" /></div>
+      <div className="fixed bottom-20 right-[10%] text-blue-500/10 float-medium pointer-events-none"><Target className="w-48 h-48" /></div>
+      <div className="fixed top-1/4 right-[5%] text-purple-500/10 float-fast pointer-events-none"><LineChart className="w-24 h-24" /></div>
+      <div className="fixed bottom-1/3 left-[8%] text-[#a23957]/5 float-medium pointer-events-none"><Smartphone className="w-40 h-40" /></div>
+      <div className="fixed top-1/2 right-[20%] text-pink-400/10 float-slow pointer-events-none"><PieChart className="w-20 h-20" /></div>
+    </>
+  );
+
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-200 via-purple-50 to-blue-200">
-        <div className="glass-container p-8 rounded-3xl w-full max-w-sm">
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 rounded-full bg-[#a23957] text-white flex items-center justify-center">
-              <Lock className="w-8 h-8" />
-            </div>
+      <div className="min-h-screen relative flex flex-col font-sans text-[#1b1c1c] overflow-hidden">
+        <AmbientBackground />
+        <div className="flex-grow flex flex-col items-center justify-center px-4 py-8 relative z-10 w-full max-w-lg mx-auto">
+          <div className="text-center mb-8">
+            <img src="/logo.png" alt="Royal300 Logo" className="h-10 mx-auto mb-4 drop-shadow-sm" />
+            <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-[1.1] drop-shadow-sm">
+              Admin <br/><span className="text-[#a23957]">Portal</span>
+            </h1>
           </div>
-          <h2 className="text-2xl font-display font-bold text-center mb-6">Admin Panel</h2>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input type="text" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} className="w-full glass-input p-3 rounded-xl outline-none" required />
-            <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="w-full glass-input p-3 rounded-xl outline-none" required />
-            <button type="submit" className="w-full glass-primary-button p-3 rounded-xl font-bold">Login</button>
-          </form>
+          <div className="w-full glass-container rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 flex flex-col relative overflow-hidden">
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="glass-input rounded-2xl p-3 flex flex-col">
+                <label className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Username</label>
+                <input type="text" value={username} onChange={e => setUsername(e.target.value)} className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-xl py-1 text-gray-900" required />
+              </div>
+              <div className="glass-input rounded-2xl p-3 flex flex-col">
+                <label className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Password</label>
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-xl py-1 text-gray-900" required />
+              </div>
+              <button type="submit" disabled={isLoggingIn} className="w-full mt-4 py-4 rounded-2xl glass-primary-button font-display font-extrabold text-base flex items-center justify-center space-x-2">
+                <span>{isLoggingIn ? "Authenticating..." : "Login"}</span>
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-pink-100 via-blue-50 to-pink-50 p-4 sm:p-6 font-sans">
-      
-      {/* Left Sidebar */}
-      <div className="w-64 glass-container rounded-3xl p-6 flex flex-col mr-6 hidden md:flex">
-        <div className="mb-8">
-          <img src="/logo.png" alt="Logo" className="h-8 mb-4" />
-          <h2 className="font-display font-bold text-gray-800 text-lg">Admin Dashboard</h2>
-        </div>
+    <div className="min-h-screen relative flex flex-col font-sans text-[#1b1c1c] overflow-hidden">
+      <AmbientBackground />
+      <div className="flex-grow flex flex-col md:flex-row items-stretch justify-center px-4 py-8 relative z-10 w-full max-w-6xl mx-auto gap-6">
         
-        <nav className="flex-grow space-y-2">
-          <button onClick={() => setActiveTab("prices")} className={`w-full text-left p-3 rounded-xl flex items-center space-x-3 transition-colors ${activeTab === 'prices' ? 'bg-white/60 font-bold text-[#a23957]' : 'hover:bg-white/30'}`}>
-            <Settings className="w-5 h-5" /> <span>Prices</span>
-          </button>
-          <button onClick={() => setActiveTab("leads")} className={`w-full text-left p-3 rounded-xl flex items-center space-x-3 transition-colors ${activeTab === 'leads' ? 'bg-white/60 font-bold text-[#a23957]' : 'hover:bg-white/30'}`}>
-            <Users className="w-5 h-5" /> <span>Leads</span>
-          </button>
-          <button onClick={() => setActiveTab("enquiries")} className={`w-full text-left p-3 rounded-xl flex items-center space-x-3 transition-colors ${activeTab === 'enquiries' ? 'bg-white/60 font-bold text-[#a23957]' : 'hover:bg-white/30'}`}>
-            <FileText className="w-5 h-5" /> <span>Enquiries</span>
-          </button>
-        </nav>
-        
-        <button onClick={handleLogout} className="mt-auto w-full text-left p-3 rounded-xl flex items-center space-x-3 hover:bg-white/30 text-gray-600">
-          <LogOut className="w-5 h-5" /> <span>Logout</span>
-        </button>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex-grow glass-container rounded-3xl p-6 sm:p-8 overflow-y-auto">
-        
-        {/* Mobile Nav */}
-        <div className="md:hidden flex space-x-2 mb-6 overflow-x-auto pb-2">
-          {["prices", "leads", "enquiries"].map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-2 rounded-xl capitalize text-sm whitespace-nowrap ${activeTab === tab ? 'bg-white/60 font-bold text-[#a23957]' : 'bg-white/30'}`}>
-              {tab}
+        {/* Left Sidebar (Desktop) */}
+        <div className="w-full md:w-64 glass-container rounded-[2rem] sm:rounded-[2.5rem] p-6 flex flex-col shrink-0">
+          <div className="mb-8 text-center md:text-left">
+            <img src="/logo.png" alt="Logo" className="h-8 mb-4 mx-auto md:mx-0" />
+            <h2 className="font-display font-extrabold text-gray-900 text-xl leading-tight">Control <br/><span className="text-[#a23957]">Center</span></h2>
+          </div>
+          <nav className="flex md:flex-col space-x-2 md:space-x-0 md:space-y-3 overflow-x-auto pb-2 md:pb-0 mb-6 md:mb-0">
+            <button onClick={() => setActiveTab("prices")} className={`shrink-0 md:w-full text-left p-3.5 rounded-2xl flex items-center space-x-3 minimal-button ${activeTab === 'prices' ? 'active border-[#a23957] font-bold text-gray-900' : 'text-gray-600'}`}>
+              <Settings className="w-5 h-5" /> <span className="hidden sm:inline">Prices</span>
             </button>
-          ))}
-          <button onClick={handleLogout} className="px-4 py-2 rounded-xl bg-white/30 text-sm">Logout</button>
+            <button onClick={() => setActiveTab("leads")} className={`shrink-0 md:w-full text-left p-3.5 rounded-2xl flex items-center space-x-3 minimal-button ${activeTab === 'leads' ? 'active border-[#a23957] font-bold text-gray-900' : 'text-gray-600'}`}>
+              <Users className="w-5 h-5" /> <span className="hidden sm:inline">Leads</span>
+            </button>
+            <button onClick={() => setActiveTab("enquiries")} className={`shrink-0 md:w-full text-left p-3.5 rounded-2xl flex items-center space-x-3 minimal-button ${activeTab === 'enquiries' ? 'active border-[#a23957] font-bold text-gray-900' : 'text-gray-600'}`}>
+              <FileText className="w-5 h-5" /> <span className="hidden sm:inline">Enquiries</span>
+            </button>
+          </nav>
+          <button onClick={handleLogout} className="mt-auto w-full text-left p-3.5 rounded-2xl flex items-center space-x-3 minimal-button text-gray-600 hidden md:flex">
+            <LogOut className="w-5 h-5" /> <span>Logout</span>
+          </button>
         </div>
 
-        {activeTab === "prices" && (
-          <div className="max-w-2xl">
-            <h1 className="text-2xl font-display font-bold mb-6 text-gray-800">Set Package Prices (₹)</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              {Object.keys(prices).map(key => (
-                <div key={key} className="glass-input p-4 rounded-2xl flex flex-col">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{key}</label>
-                  <input 
-                    type="number" 
-                    value={prices[key]} 
-                    onChange={e => setPrices({...prices, [key]: parseInt(e.target.value) || 0})}
-                    className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none text-xl py-1"
-                  />
-                </div>
-              ))}
+        {/* Main Content Area */}
+        <div className="flex-grow glass-container rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 flex flex-col relative overflow-hidden min-h-[500px]">
+          
+          {activeTab === "prices" && (
+            <div className="w-full">
+              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug mb-6">Package Pricing</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                {Object.keys(prices).map(key => (
+                  <div key={key} className="glass-input p-4 rounded-2xl flex flex-col">
+                    <label className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{key}</label>
+                    <div className="flex items-center text-xl font-display">
+                      <span className="text-gray-400 mr-2">₹</span>
+                      <input 
+                        type="number" 
+                        value={prices[key]} 
+                        onChange={e => setPrices({...prices, [key]: parseInt(e.target.value) || 0})}
+                        className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none w-full py-1 text-gray-900"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={savePrices} className="w-full sm:w-auto py-4 px-8 rounded-2xl glass-primary-button font-display font-extrabold text-base flex items-center justify-center space-x-2">
+                <Check className="w-5 h-5" /> <span>Save Prices</span>
+              </button>
             </div>
-            <button onClick={savePrices} className="glass-primary-button px-6 py-3 rounded-xl font-bold flex items-center space-x-2">
-              <Check className="w-5 h-5" /> <span>Save Prices</span>
+          )}
+
+          {activeTab === "leads" && (
+            <div className="w-full flex flex-col h-full">
+              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug mb-6">Captured Leads</h2>
+              <div className="flex-grow overflow-auto glass-input rounded-3xl p-2">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-300/50">
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leads.map(lead => (
+                      <tr key={lead.id} className="border-b border-gray-200/50 hover:bg-white/30 transition-colors">
+                        <td className="p-4 text-sm font-mono text-[#a23957]">#{lead.id}</td>
+                        <td className="p-4 text-sm font-semibold text-gray-800">{lead.name}</td>
+                        <td className="p-4 text-sm font-mono text-gray-600">{lead.phone}</td>
+                        <td className="p-4 text-xs text-gray-500">{new Date(lead.created_at).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                    {leads.length === 0 && <tr><td colSpan={4} className="p-8 text-center text-sm text-gray-500">No leads captured yet.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "enquiries" && (
+            <div className="w-full flex flex-col h-full">
+              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug mb-6">Completed Submissions</h2>
+              <div className="flex-grow overflow-auto glass-input rounded-3xl p-2">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-300/50">
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {enquiries.map(enq => (
+                      <tr key={enq.enquiry_id} className="border-b border-gray-200/50 hover:bg-white/30 transition-colors">
+                        <td className="p-4 text-sm font-mono text-[#a23957]">#{enq.enquiry_id}</td>
+                        <td className="p-4 text-sm font-semibold text-gray-800">{enq.name || "N/A"}</td>
+                        <td className="p-4 text-xs text-gray-500">{new Date(enq.created_at).toLocaleString()}</td>
+                        <td className="p-4">
+                          <button onClick={() => setSelectedEnquiry(enq)} className="minimal-button px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 text-[#a23957]">
+                            <Eye className="w-4 h-4" /> <span>View</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {enquiries.length === 0 && <tr><td colSpan={4} className="p-8 text-center text-sm text-gray-500">No completed submissions yet.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Logout */}
+          <div className="md:hidden mt-6 pt-4 border-t border-gray-300/50">
+            <button onClick={handleLogout} className="w-full text-center p-3 rounded-2xl minimal-button text-gray-600 flex justify-center items-center space-x-2">
+              <LogOut className="w-4 h-4" /> <span>Logout</span>
             </button>
           </div>
-        )}
 
-        {activeTab === "leads" && (
-          <div>
-            <h1 className="text-2xl font-display font-bold mb-6 text-gray-800">Recent Leads (Step 1 Completed)</h1>
-            <div className="bg-white/40 rounded-2xl overflow-hidden">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-white/50 border-b border-white">
-                    <th className="p-4 text-sm font-bold text-gray-600">ID</th>
-                    <th className="p-4 text-sm font-bold text-gray-600">Name</th>
-                    <th className="p-4 text-sm font-bold text-gray-600">Phone</th>
-                    <th className="p-4 text-sm font-bold text-gray-600">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leads.map(lead => (
-                    <tr key={lead.id} className="border-b border-white/40 hover:bg-white/30">
-                      <td className="p-4 text-sm text-gray-500">#{lead.id}</td>
-                      <td className="p-4 font-semibold">{lead.name}</td>
-                      <td className="p-4 font-mono">{lead.phone}</td>
-                      <td className="p-4 text-sm text-gray-500">{new Date(lead.created_at).toLocaleString()}</td>
-                    </tr>
-                  ))}
-                  {leads.length === 0 && <tr><td colSpan={4} className="p-8 text-center text-gray-500">No leads found.</td></tr>}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "enquiries" && (
-          <div>
-            <h1 className="text-2xl font-display font-bold mb-6 text-gray-800">Completed Enquiries</h1>
-            <div className="bg-white/40 rounded-2xl overflow-hidden">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-white/50 border-b border-white">
-                    <th className="p-4 text-sm font-bold text-gray-600">ID</th>
-                    <th className="p-4 text-sm font-bold text-gray-600">Name</th>
-                    <th className="p-4 text-sm font-bold text-gray-600">Phone</th>
-                    <th className="p-4 text-sm font-bold text-gray-600">Date</th>
-                    <th className="p-4 text-sm font-bold text-gray-600">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {enquiries.map(enq => (
-                    <tr key={enq.enquiry_id} className="border-b border-white/40 hover:bg-white/30">
-                      <td className="p-4 text-sm text-gray-500">#{enq.enquiry_id}</td>
-                      <td className="p-4 font-semibold">{enq.name || "N/A"}</td>
-                      <td className="p-4 font-mono">{enq.phone || "N/A"}</td>
-                      <td className="p-4 text-sm text-gray-500">{new Date(enq.created_at).toLocaleString()}</td>
-                      <td className="p-4">
-                        <button onClick={() => setSelectedEnquiry(enq)} className="minimal-button px-3 py-1.5 rounded-lg text-sm flex items-center space-x-1">
-                          <Eye className="w-4 h-4" /> <span>View Details</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {enquiries.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-gray-500">No completed enquiries found.</td></tr>}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
+        </div>
       </div>
 
       {/* Details Modal */}
       {selectedEnquiry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="glass-container w-full max-w-2xl bg-white/90 p-6 rounded-3xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-display font-bold">Enquiry Details</h2>
-              <button onClick={() => setSelectedEnquiry(null)} className="p-2 bg-gray-200 rounded-full hover:bg-gray-300">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-md">
+          <div className="glass-container w-full max-w-2xl p-6 sm:p-10 rounded-[2.5rem] max-h-[90vh] overflow-y-auto relative shadow-2xl">
+            <button onClick={() => setSelectedEnquiry(null)} className="absolute top-6 right-6 p-2 bg-white/50 rounded-full hover:bg-white/80 transition-colors">
+              <X className="w-5 h-5 text-gray-800" />
+            </button>
             
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="p-4 bg-gray-100 rounded-xl">
-                <p className="text-xs text-gray-500 uppercase font-bold">Name</p>
-                <p className="font-semibold text-lg">{selectedEnquiry.name}</p>
+            <h2 className="font-display text-3xl font-extrabold text-gray-900 mb-8">Package Details</h2>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              <div className="glass-input p-5 rounded-2xl">
+                <p className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Customer Name</p>
+                <p className="font-display font-bold text-lg text-gray-900">{selectedEnquiry.name}</p>
               </div>
-              <div className="p-4 bg-gray-100 rounded-xl">
-                <p className="text-xs text-gray-500 uppercase font-bold">Phone</p>
-                <p className="font-semibold text-lg">{selectedEnquiry.phone}</p>
+              <div className="glass-input p-5 rounded-2xl">
+                <p className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Phone Number</p>
+                <p className="font-mono font-medium text-lg text-[#a23957]">{selectedEnquiry.phone}</p>
               </div>
             </div>
 
-            <h3 className="font-bold text-gray-700 mb-3 border-b pb-2">Package Selections</h3>
-            <div className="space-y-2 text-sm">
-              <pre className="bg-gray-100 p-4 rounded-xl overflow-x-auto text-xs text-gray-800">
+            <h3 className="font-display font-bold text-xl text-gray-800 mb-4">Selections JSON</h3>
+            <div className="glass-input p-5 rounded-2xl overflow-x-auto">
+              <pre className="text-xs font-mono text-gray-700">
                 {JSON.stringify(selectedEnquiry.details, null, 2)}
               </pre>
             </div>

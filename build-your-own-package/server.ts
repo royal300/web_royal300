@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3005;
 const JWT_SECRET = process.env.JWT_SECRET || "royal300_super_secret_key_2026";
 
 app.use(express.json());
