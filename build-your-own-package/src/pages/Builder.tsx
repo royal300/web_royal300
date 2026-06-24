@@ -122,13 +122,13 @@ export default function Builder() {
 
   const canProceed = () => {
     if (currentStep === 0) return data.name.trim() !== "" && data.phone.trim().length >= 10;
-    if (currentStep === 1) return data.reels >= 0;
-    if (currentStep === 2) return data.creatives >= 0;
+    if (currentStep === 1) return customInputVisible[1] ? data.reels >= 4 : data.reels > 0;
+    if (currentStep === 2) return data.creatives > 0;
     if (currentStep === 3) return data.videos >= 0;
     if (currentStep === 4) return data.shootDays >= 0;
     if (currentStep === 5) return true; 
     if (currentStep === 6) return data.influencerBudget !== "";
-    if (currentStep === 7) return data.adsManagement === false || (data.adsManagement === true && data.weeklyAdBudget !== "");
+    if (currentStep === 7) return data.adsManagement === false || (data.adsManagement === true && data.weeklyAdBudget.trim() !== "" && parseFloat(data.weeklyAdBudget) > 0);
     return true;
   };
 
@@ -215,7 +215,7 @@ export default function Builder() {
       <div className="absolute top-1/2 right-[20%] text-pink-400/10 float-slow"><PieChart className="w-20 h-20" /></div>
 
       {/* Main Centered Layout */}
-      <div className="flex-grow flex flex-col items-center justify-start sm:justify-center px-4 pt-6 pb-6 sm:py-8 relative z-10 w-full max-w-2xl mx-auto">
+      <div className="flex-grow flex flex-col items-center justify-start sm:justify-center px-4 pt-12 pb-6 sm:py-8 relative z-10 w-full max-w-2xl mx-auto">
         
         {/* Title Header */}
         <div className="text-center mb-3 sm:mb-6 mt-0">
@@ -316,6 +316,9 @@ export default function Builder() {
                           type="number" min="0" value={data.reels || ""} onChange={(e) => updateData("reels", parseInt(e.target.value) || 0)}
                           className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-base py-1 text-gray-900"
                         />
+                        {data.reels < 4 && (
+                          <p className="text-[10px] text-[#a23957] font-semibold mt-1">At least 4 Reels need to be added.</p>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -354,6 +357,9 @@ export default function Builder() {
                           type="number" min="0" value={data.creatives || ""} onChange={(e) => updateData("creatives", parseInt(e.target.value) || 0)}
                           className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-base py-1 text-gray-900"
                         />
+                        {data.creatives <= 0 && (
+                          <p className="text-[10px] text-[#a23957] font-semibold mt-1">Please enter at least 1 creative.</p>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -523,6 +529,9 @@ export default function Builder() {
                             className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none w-full py-1 text-gray-900"
                           />
                         </div>
+                        {(data.weeklyAdBudget.trim() === "" || parseFloat(data.weeklyAdBudget) <= 0) && (
+                          <p className="text-[10px] text-[#a23957] font-semibold mt-1">Please enter a valid weekly budget.</p>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -568,6 +577,25 @@ export default function Builder() {
                       {data.platforms.youtube && <div className="flex flex-col"><span className="text-gray-500">YT Mgmt</span><span className="font-bold text-[#a23957]">₹{prices.youtube}</span></div>}
                       {data.platforms.google && <div className="flex flex-col"><span className="text-gray-500">Google Profile</span><span className="font-bold text-[#a23957]">₹{prices.google}</span></div>}
                     </div>
+                    {((data.influencerBudget && data.influencerBudget !== "No") || data.adsManagement === true) && (
+                      <div className="mt-3 pt-2.5 border-t border-gray-300/50">
+                        <h4 className="font-mono text-[9px] font-bold text-[#a23957] uppercase tracking-wider mb-1.5">Additional Services</h4>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] sm:text-xs text-gray-700 font-medium">
+                          {data.influencerBudget && data.influencerBudget !== "No" && (
+                            <div className="flex flex-col">
+                              <span className="text-gray-500">Influencer Budget</span>
+                              <span className="font-bold text-[#a23957]">{data.influencerBudget}</span>
+                            </div>
+                          )}
+                          {data.adsManagement === true && (
+                            <div className="flex flex-col">
+                              <span className="text-gray-500">Ads Management</span>
+                              <span className="font-bold text-[#a23957]">Yes (₹{Number(data.weeklyAdBudget || 0).toLocaleString()}/wk budget)</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <button
