@@ -2,136 +2,200 @@ import express from "express";
 import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI, Type } from "@google/genai";
+import mysql from "mysql2/promise";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
+const JWT_SECRET = process.env.JWT_SECRET || "royal300_super_secret_key_2026";
 
 app.use(express.json());
 
-// Initialize Gemini Client server-side with metadata tracking
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      "User-Agent": "aistudio-build",
-    },
-  },
+// MySQL Connection Pool
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || "127.0.0.1",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "mypass",
+  database: process.env.DB_NAME || "web_royal300",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-// Full-stack API Route for generating a custom social media marketing package
-app.post("/api/generate-package", async (req, res) => {
+// Database Initialization
+async function initDB() {
   try {
-    const { platform, goal, frequency, tone } = req.body;
+    const connection = await pool.getConnection();
+    console.log("[DB] Connected to MySQL successfully");
 
-    if (!platform || !goal || !frequency || !tone) {
-      return res.status(400).json({ error: "Missing required survey answers: platform, goal, frequency, tone" });
+    // Create Prices Table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS prices (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        item_key VARCHAR(255) UNIQUE NOT NULL,
+        price INT NOT NULL
+      )
+    `);
+
+    // Create Leads Table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS leads (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        phone VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create Enquiries Table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS enquiries (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        lead_id INT NULL,
+        details JSON NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE SET NULL
+      )
+    `);
+
+    // Seed default prices if empty
+    const [rows]: any = await connection.query("SELECT COUNT(*) as count FROM prices");
+    if (rows[0].count === 0) {
+      const defaultPrices = [
+        ['reels', 300], ['creatives', 80], ['videos', 1000], ['shootDays', 3000],
+        ['facebook', 1500], ['instagram', 1500], ['youtube', 2000], ['google', 1000]
+      ];
+      for (const [key, price] of defaultPrices) {
+        await connection.query("INSERT INTO prices (item_key, price) VALUES (?, ?)", [key, price]);
+      }
+      console.log("[DB] Seeded default prices");
     }
 
-    const prompt = `Generate a highly personalized, high-fidelity custom social media marketing package and execution plan based on the following survey results:
-- Primary Platform: ${platform}
-- Core Growth Goal: ${goal}
-- Posting Frequency: ${frequency}
-- Brand Tone & Style: ${tone}
+    connection.release();
+  } catch (error) {
+    console.error("[DB] Initialization failed. Check credentials and server status:", error);
+  }
+}
 
-Please produce a comprehensive, realistic, and highly actionable digital playbook. Deliver deep value and premium strategies tailored directly to these choices.`;
+// Middleware for JWT Authentication
+const authenticateToken = (req: any, res: any, next: any) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token == null) return res.sendStatus(401);
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        systemInstruction: "You are an elite, premium social media strategist and digital marketing growth director. You create tailored growth playbooks, content schedules, and copy templates that drive real results. Avoid generic marketing buzzwords and give highly specific, tactical, and immediately executable ideas. Ensure the weekly schedule strictly matches the user's requested posting frequency (e.g. if they request Once a Day, provide 7 distinct post topics; if they say 3-4 times a week, specify which 3-4 days; if they say Once a week or less, provide 1 premium high-impact post recommendation).",
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            profileName: {
-              type: Type.STRING,
-              description: "A tailored professional role descriptor, e.g., 'Aesthetic Brand Catalyst', 'B2B Trust Authority', 'Viral Velocity Specialist'."
-            },
-            strategyName: {
-              type: Type.STRING,
-              description: "A sophisticated marketing strategy name, e.g., 'High-Value Conversion Funnel', 'Dynamic Omni-Reach Engine'."
-            },
-            strategyOverview: {
-              type: Type.STRING,
-              description: "A polished, executive-level 2-3 sentence strategic summary outlining exactly how the user will achieve their core goal on their primary platform."
-            },
-            platformPlaybook: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-              description: "3 highly platform-specific 'secrets' or elite optimization principles for their chosen platform (e.g. specific algorithm cues, hook formats, or audio trends)."
-            },
-            weeklySchedule: {
-              type: Type.ARRAY,
-              description: "Day-by-day content calendar outline aligned with their frequency choice.",
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  day: { type: Type.STRING, description: "Name of the day, e.g., 'Monday', 'Wednesday'." },
-                  contentType: { type: Type.STRING, description: "Format, e.g., 'Short-form Video (Reel/TikTok)', 'Carousel Study', 'Text/Image Story'." },
-                  topic: { type: Type.STRING, description: "A magnetic, highly conversion-focused topic tailored to their niche and goal." },
-                  description: { type: Type.STRING, description: "Quick tactical instruction on how to execute this post (what to say, what footage to use)." }
-                },
-                required: ["day", "contentType", "topic", "description"]
-              }
-            },
-            postConcepts: {
-              type: Type.ARRAY,
-              description: "3 ready-to-post, high-converting copy templates.",
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  title: { type: Type.STRING, description: "A descriptive title for this copy template." },
-                  hook: { type: Type.STRING, description: "A scroll-stopping opening line designed for the chosen brand tone." },
-                  body: { type: Type.STRING, description: "A high-fidelity structured copy template with blanks/placeholders or ready-to-use narrative structure." },
-                  callToAction: { type: Type.STRING, description: "A powerful, single-minded call to action aligned with the core goal." },
-                  hashtags: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "5 highly relevant trending/niche hashtags."
-                  }
-                },
-                required: ["title", "hook", "body", "callToAction", "hashtags"]
-              }
-            },
-            actionPlan: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-              description: "3 concrete, tactical tasks they must execute on their profile today (e.g., bios, pinned posts, direct messaging setups)."
-            }
-          },
-          required: [
-            "profileName",
-            "strategyName",
-            "strategyOverview",
-            "platformPlaybook",
-            "weeklySchedule",
-            "postConcepts",
-            "actionPlan"
-          ]
-        }
-      }
-    });
+  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
 
-    const resultText = response.text || "{}";
-    const parsedData = JSON.parse(resultText);
-    res.json(parsedData);
-  } catch (error: any) {
-    console.error("Gemini Package Generator Error:", error);
-    res.status(500).json({ error: "Failed to generate package. Please check that GEMINI_API_KEY is configured in Settings > Secrets." });
+// --- API ROUTES ---
+
+// 1. Admin Login
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body;
+  if (username === "admin" && password === "admin123") {
+    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '24h' });
+    res.json({ token });
+  } else {
+    res.status(401).json({ error: "Invalid credentials" });
   }
 });
 
-// Health check endpoint
-app.get("/api/health", (req, res) => {
-  res.json({ status: "healthy", time: new Date().toISOString() });
+// 2. Fetch Prices (Public)
+app.get("/api/prices", async (req, res) => {
+  try {
+    const [rows]: any = await pool.query("SELECT item_key, price FROM prices");
+    const prices: Record<string, number> = {};
+    rows.forEach((row: any) => {
+      prices[row.item_key] = row.price;
+    });
+    res.json(prices);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch prices" });
+  }
+});
+
+// 3. Update Prices (Protected)
+app.post("/api/prices", authenticateToken, async (req, res) => {
+  try {
+    const pricesToUpdate = req.body; // e.g. { reels: 400, creatives: 90 }
+    for (const [key, price] of Object.entries(pricesToUpdate)) {
+      await pool.query(
+        "INSERT INTO prices (item_key, price) VALUES (?, ?) ON DUPLICATE KEY UPDATE price = VALUES(price)",
+        [key, price]
+      );
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update prices" });
+  }
+});
+
+// 4. Submit Lead (Public) - Step 1
+app.post("/api/leads", async (req, res) => {
+  try {
+    const { name, phone } = req.body;
+    if (!name || !phone) return res.status(400).json({ error: "Name and phone required" });
+    
+    const [result]: any = await pool.query("INSERT INTO leads (name, phone) VALUES (?, ?)", [name, phone]);
+    res.json({ success: true, lead_id: result.insertId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to save lead" });
+  }
+});
+
+// 5. Submit Final Enquiry (Public) - Final Step
+app.post("/api/enquiries", async (req, res) => {
+  try {
+    const { lead_id, details } = req.body;
+    if (!details) return res.status(400).json({ error: "Details required" });
+
+    await pool.query("INSERT INTO enquiries (lead_id, details) VALUES (?, ?)", [lead_id || null, JSON.stringify(details)]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to save enquiry" });
+  }
+});
+
+// 6. Get Leads (Protected)
+app.get("/api/leads", authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM leads ORDER BY created_at DESC");
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch leads" });
+  }
+});
+
+// 7. Get Enquiries (Protected)
+app.get("/api/enquiries", authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT e.id as enquiry_id, e.details, e.created_at, l.name, l.phone 
+      FROM enquiries e 
+      LEFT JOIN leads l ON e.lead_id = l.id 
+      ORDER BY e.created_at DESC
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch enquiries" });
+  }
 });
 
 // Configure Vite or Static Asset serving
 async function startServer() {
+  await initDB();
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -141,14 +205,14 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    // Serve SPA index.html for all unknown client routes
+    // Serve SPA index.html for all unknown client routes (React Router support)
     app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`[BYOP Server] Full-stack application running on http://localhost:${PORT} in ${process.env.NODE_ENV || "development"} mode`);
+    console.log(`[BYOP Server] Running on http://localhost:${PORT} in ${process.env.NODE_ENV || "development"} mode`);
   });
 }
 
