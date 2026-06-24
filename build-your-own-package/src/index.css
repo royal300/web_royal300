@@ -8,130 +8,116 @@
 }
 
 body {
-  background-color: #fbf9f8;
+  margin: 0;
+  padding: 0;
   color: #1b1c1c;
   font-family: var(--font-sans);
   overflow-x: hidden;
   min-height: 100vh;
+  /* Animated Pinkish/Bluish Ambient Gradient */
+  background: linear-gradient(135deg, #fce4ec 0%, #e8eaf6 50%, #f3e5f5 100%);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
 }
 
-/* --- Tactile Neumorphic Utilities --- */
-.neu-flat {
-  background: #fbf9f8;
-  box-shadow: 8px 8px 20px #dcdad9, -8px -8px 20px #ffffff;
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.neu-inset {
-  background: #fbf9f8;
-  box-shadow: inset 6px 6px 12px #d2d0cf, inset -6px -6px 12px #ffffff;
+/* --- Minimalist Glassmorphic Utilities --- */
+
+/* The main central form container */
+.glass-container {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 10px 40px rgba(162, 57, 87, 0.08);
 }
 
-.neu-card {
-  background: #fbf9f8;
-  box-shadow: 8px 8px 16px #dcdad9, -8px -8px 16px #ffffff;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Transparent form controls (inputs) */
+.glass-input {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
 }
-
-.neu-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 12px 12px 24px #d2d0cf, -12px -12px 24px #ffffff;
-}
-
-.neu-card.active {
-  box-shadow: inset 5px 5px 10px #dcdad9, inset -5px -5px 10px #ffffff;
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.9);
   border-color: #a23957;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(162, 57, 87, 0.15);
 }
 
-.neu-button {
-  background: #fbf9f8;
-  box-shadow: 6px 6px 12px #dcdad9, -6px -6px 12px #ffffff;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #a23957;
-}
-
-.neu-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 8px 8px 16px #d2d0cf, -8px -8px 16px #ffffff;
-}
-
-.neu-button:active:not(:disabled) {
-  box-shadow: inset 4px 4px 8px #d2d0cf, inset -4px -4px 8px #ffffff;
-  transform: translateY(1px);
-}
-
-.neu-button:disabled {
-  box-shadow: none;
-  background: #efeded;
-  color: #9c9ea2;
-  cursor: not-allowed;
-}
-
-.neu-primary-button {
-  background: #a23957;
-  box-shadow: 6px 6px 16px rgba(162, 57, 87, 0.25), -6px -6px 16px #ffffff;
-  color: white;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.neu-primary-button:hover:not(:disabled) {
-  background: #b44765;
-  transform: translateY(-1px);
-  box-shadow: 8px 8px 20px rgba(162, 57, 87, 0.35), -8px -8px 20px #ffffff;
-}
-
-.neu-primary-button:active:not(:disabled) {
-  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.25);
-  transform: translateY(1px);
-}
-
-.neu-primary-button:disabled {
-  background: #dbd9d9;
-  box-shadow: none;
-  cursor: not-allowed;
-}
-
-.neu-progress-track {
-  background: #fbf9f8;
-  box-shadow: inset 2px 2px 5px #dcdad9, inset -2px -2px 5px #ffffff;
-}
-
-.neu-icon-container {
-  background: #fbf9f8;
-  box-shadow: 4px 4px 8px #dcdad9, -4px -4px 8px #ffffff;
-}
-
-/* --- Glassmorphic Premium Utilities --- */
-.glass-card {
+/* Minimal Selection Buttons */
+.minimal-button {
   background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 10px 30px rgba(162, 57, 87, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+.minimal-button:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(162, 57, 87, 0.05);
+}
+.minimal-button.active {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #a23957;
+  box-shadow: 0 4px 16px rgba(162, 57, 87, 0.1);
 }
 
-.glass-button {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Primary Action Button */
+.glass-primary-button {
+  background: #a23957;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(162, 57, 87, 0.3);
+  transition: all 0.2s ease;
 }
-
-.glass-button:hover {
-  background: rgba(255, 255, 255, 0.7);
+.glass-primary-button:hover:not(:disabled) {
+  background: #b44765;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(244, 114, 182, 0.15);
+  box-shadow: 0 6px 20px rgba(162, 57, 87, 0.4);
+}
+.glass-primary-button:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(162, 57, 87, 0.3);
+}
+.glass-primary-button:disabled {
+  background: rgba(162, 57, 87, 0.4);
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
-/* Floating ambient animation for aesthetic details */
-.floating-element {
-  animation: float 6s ease-in-out infinite;
+/* Floating Ambient Animations */
+.float-slow {
+  animation: floatSlow 8s ease-in-out infinite;
+}
+.float-medium {
+  animation: floatMedium 6s ease-in-out infinite;
+}
+.float-fast {
+  animation: floatFast 4s ease-in-out infinite;
 }
 
-@keyframes float {
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(2deg); }
+}
+@keyframes floatMedium {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(-2deg); }
+}
+@keyframes floatFast {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-16px); }
+  50% { transform: translateY(-10px); }
 }
 
-.progress-glow {
-  box-shadow: 0 0 12px rgba(162, 57, 87, 0.3);
+/* Hide scrollbar for a cleaner minimal look */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
 }
