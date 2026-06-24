@@ -143,22 +143,29 @@ export default function Builder() {
     return (
       <button
         onClick={onClick}
-        className={`w-full text-left p-3.5 sm:p-4 rounded-2xl flex items-center space-x-4 minimal-button ${
-          isSelected ? "active border-[#a23957]" : "border-white/50"
+        className={`w-full text-left p-2.5 sm:p-3 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 minimal-button ${
+          isSelected ? "active border-[#a23957] bg-white/40" : "border-white/50 bg-white/20"
         }`}
       >
-        {Icon && (
-          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-colors ${
-            isSelected ? "bg-[#a23957] text-white" : "bg-white/40 text-gray-700"
-          }`}>
-            <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-          </div>
-        )}
-        <div className="flex-grow">
-          <h3 className="font-display font-semibold text-sm sm:text-base text-gray-900">{label}</h3>
+        <div className="flex items-center justify-between w-full sm:w-auto">
+          {Icon && (
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+              isSelected ? "bg-[#a23957] text-white" : "bg-white/40 text-gray-700"
+            }`}>
+              <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+          )}
+          {isSelected && (
+            <div className="w-5 h-5 rounded-full bg-[#a23957] flex sm:hidden items-center justify-center text-white shadow-sm shrink-0">
+              <Check className="w-3 h-3 stroke-[3px]" />
+            </div>
+          )}
+        </div>
+        <div className="flex-grow w-full">
+          <h3 className="font-display font-semibold text-xs sm:text-sm text-gray-900">{label}</h3>
         </div>
         {isSelected && (
-          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#a23957] flex items-center justify-center text-white shadow-sm">
+          <div className="hidden sm:flex w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#a23957] items-center justify-center text-white shadow-sm shrink-0">
             <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3px]" />
           </div>
         )}
@@ -169,20 +176,27 @@ export default function Builder() {
   const MultiSelectOption = ({ label, priceLabel, isSelected, onClick, icon: Icon }: any) => (
     <button
       onClick={onClick}
-      className={`w-full text-left p-3.5 sm:p-4 rounded-2xl flex items-center space-x-3 sm:space-x-4 minimal-button ${
-        isSelected ? "active border-[#a23957]" : "border-white/50"
+      className={`w-full text-left p-2.5 sm:p-3 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 minimal-button ${
+        isSelected ? "active border-[#a23957] bg-white/40" : "border-white/50 bg-white/20"
       }`}
     >
-      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-        isSelected ? "bg-[#a23957] text-white" : "bg-white/40 text-gray-700"
-      }`}>
-        <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+      <div className="flex items-center justify-between w-full sm:w-auto">
+        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+          isSelected ? "bg-[#a23957] text-white" : "bg-white/40 text-gray-700"
+        }`}>
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+        </div>
+        <div className={`w-5 h-5 rounded-md border-2 flex sm:hidden items-center justify-center transition-all shrink-0 ${
+          isSelected ? "border-[#a23957] bg-[#a23957] text-white" : "border-gray-300 bg-white/20"
+        }`}>
+          {isSelected && <Check className="w-3 h-3 stroke-[3px]" />}
+        </div>
       </div>
-      <div className="flex-grow">
-        <h3 className="font-display font-semibold text-sm sm:text-base text-gray-900">{label}</h3>
-        <p className="text-[10px] sm:text-[11px] font-mono text-[#a23957] mt-0.5">+₹{priceLabel}</p>
+      <div className="flex-grow w-full">
+        <h3 className="font-display font-semibold text-xs sm:text-sm text-gray-900 leading-tight">{label}</h3>
+        <p className="text-[9px] sm:text-[10px] font-mono text-[#a23957] mt-0.5">+₹{priceLabel}</p>
       </div>
-      <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md border-2 flex items-center justify-center transition-all ${
+      <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md border-2 hidden sm:flex items-center justify-center transition-all shrink-0 ${
         isSelected ? "border-[#a23957] bg-[#a23957] text-white" : "border-gray-300 bg-white/20"
       }`}>
         {isSelected && <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3px]" />}
@@ -244,28 +258,28 @@ export default function Builder() {
               {currentStep === 0 && (
                 <motion.div
                   key="step0" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4 }}
-                  className="absolute inset-0"
+                  className="absolute inset-0 overflow-y-auto overflow-x-hidden pr-1 pb-4"
                 >
-                  <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug mb-6">
+                  <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug mb-4">
                     Let's start with your details
                   </h2>
-                  <div className="space-y-4">
-                    <div className="glass-input rounded-2xl p-3 flex items-center">
-                      <div className="w-10 h-10 flex items-center justify-center text-gray-400">
-                        <User className="w-5 h-5" />
+                  <div className="space-y-3">
+                    <div className="glass-input rounded-2xl p-2.5 sm:p-3 flex items-center">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-400">
+                        <User className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
                       <input 
                         type="text" placeholder="Your Full Name" value={data.name} onChange={(e) => updateData("name", e.target.value)}
-                        className="flex-grow bg-transparent border-none outline-none font-display text-base px-2 text-gray-800 placeholder-gray-400"
+                        className="flex-grow bg-transparent border-none outline-none font-display text-sm sm:text-base px-2 text-gray-800 placeholder-gray-400"
                       />
                     </div>
-                    <div className="glass-input rounded-2xl p-3 flex items-center">
-                      <div className="w-10 h-10 flex items-center justify-center text-gray-400">
-                        <Phone className="w-5 h-5" />
+                    <div className="glass-input rounded-2xl p-2.5 sm:p-3 flex items-center">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-400">
+                        <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
                       <input 
                         type="tel" placeholder="Mobile Number" value={data.phone} onChange={(e) => updateData("phone", e.target.value)}
-                        className="flex-grow bg-transparent border-none outline-none font-display text-base px-2 text-gray-800 placeholder-gray-400"
+                        className="flex-grow bg-transparent border-none outline-none font-display text-sm sm:text-base px-2 text-gray-800 placeholder-gray-400"
                       />
                     </div>
                   </div>
@@ -276,13 +290,13 @@ export default function Builder() {
               {currentStep === 1 && (
                 <motion.div
                   key="step1" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4 }}
-                  className="absolute inset-0"
+                  className="absolute inset-0 overflow-y-auto overflow-x-hidden pr-1 pb-4"
                 >
-                  <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">
-                    How many Reels do you need every month?
+                  <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug">
+                    How many Reels do you need?
                   </h2>
-                  <p className="text-xs text-[#a23957] font-mono mt-1.5 mb-6 bg-white/50 inline-block px-2 py-1 rounded-md">₹{prices.reels} per reel</p>
-                  <div className="space-y-2.5">
+                  <p className="text-[10px] sm:text-xs text-[#a23957] font-mono mt-1 mb-4 bg-white/50 inline-block px-2 py-1 rounded-md">₹{prices.reels} per reel</p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {[4, 8, 12].map(num => (
                       <SelectOption 
                         key={num} label={`${num} Reels`} value={num} currentValue={!customInputVisible[1] ? data.reels : -1} 
@@ -293,18 +307,18 @@ export default function Builder() {
                       label="Custom" value={true} currentValue={customInputVisible[1]} 
                       onClick={() => { setCustomInputVisible({...customInputVisible, 1: true}); updateData("reels", 0); }} icon={Sparkles}
                     />
-                    {customInputVisible[1] && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-2">
-                        <div className="glass-input rounded-2xl p-4 flex flex-col">
-                          <label className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Enter Number of Reels</label>
-                          <input 
-                            type="number" min="0" value={data.reels || ""} onChange={(e) => updateData("reels", parseInt(e.target.value) || 0)}
-                            className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-xl py-1 text-gray-900"
-                          />
-                        </div>
-                      </motion.div>
-                    )}
                   </div>
+                  {customInputVisible[1] && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-3">
+                      <div className="glass-input rounded-2xl p-3 flex flex-col">
+                        <label className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Enter Number of Reels</label>
+                        <input 
+                          type="number" min="0" value={data.reels || ""} onChange={(e) => updateData("reels", parseInt(e.target.value) || 0)}
+                          className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-base py-1 text-gray-900"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
 
@@ -312,35 +326,37 @@ export default function Builder() {
               {currentStep === 2 && (
                 <motion.div
                   key="step2" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4 }}
-                  className="absolute inset-0"
+                  className="absolute inset-0 overflow-y-auto overflow-x-hidden pr-1 pb-4"
                 >
-                  <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">
-                    How many Creatives do you need every month?
+                  <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug">
+                    How many Creatives do you need?
                   </h2>
-                  <p className="text-xs text-[#a23957] font-mono mt-1.5 mb-6 bg-white/50 inline-block px-2 py-1 rounded-md">₹{prices.creatives} per creative</p>
-                  <div className="space-y-2.5">
+                  <p className="text-[10px] sm:text-xs text-[#a23957] font-mono mt-1 mb-4 bg-white/50 inline-block px-2 py-1 rounded-md">₹{prices.creatives} per creative</p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {[4, 8, 12, 16].map(num => (
                       <SelectOption 
                         key={num} label={`${num} Creatives`} value={num} currentValue={!customInputVisible[2] ? data.creatives : -1} 
                         onClick={() => { setCustomInputVisible({...customInputVisible, 2: false}); updateData("creatives", num); }} icon={ImageIcon}
                       />
                     ))}
-                    <SelectOption 
-                      label="Custom" value={true} currentValue={customInputVisible[2]} 
-                      onClick={() => { setCustomInputVisible({...customInputVisible, 2: true}); updateData("creatives", 0); }} icon={Sparkles}
-                    />
-                    {customInputVisible[2] && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-2">
-                        <div className="glass-input rounded-2xl p-4 flex flex-col">
-                          <label className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Enter Number of Creatives</label>
-                          <input 
-                            type="number" min="0" value={data.creatives || ""} onChange={(e) => updateData("creatives", parseInt(e.target.value) || 0)}
-                            className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-xl py-1 text-gray-900"
-                          />
-                        </div>
-                      </motion.div>
-                    )}
+                    <div className="col-span-2">
+                      <SelectOption 
+                        label="Custom" value={true} currentValue={customInputVisible[2]} 
+                        onClick={() => { setCustomInputVisible({...customInputVisible, 2: true}); updateData("creatives", 0); }} icon={Sparkles}
+                      />
+                    </div>
                   </div>
+                  {customInputVisible[2] && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-3">
+                      <div className="glass-input rounded-2xl p-3 flex flex-col">
+                        <label className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Enter Number of Creatives</label>
+                        <input 
+                          type="number" min="0" value={data.creatives || ""} onChange={(e) => updateData("creatives", parseInt(e.target.value) || 0)}
+                          className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-base py-1 text-gray-900"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
 
@@ -348,13 +364,13 @@ export default function Builder() {
               {currentStep === 3 && (
                 <motion.div
                   key="step3" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4 }}
-                  className="absolute inset-0"
+                  className="absolute inset-0 overflow-y-auto overflow-x-hidden pr-1 pb-4"
                 >
-                  <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">
-                    How many Long Videos do you need?
+                  <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug">
+                    How many Long Videos?
                   </h2>
-                  <p className="text-xs text-[#a23957] font-mono mt-1.5 mb-6 bg-white/50 inline-block px-2 py-1 rounded-md">₹{prices.videos} each</p>
-                  <div className="space-y-2.5">
+                  <p className="text-[10px] sm:text-xs text-[#a23957] font-mono mt-1 mb-4 bg-white/50 inline-block px-2 py-1 rounded-md">₹{prices.videos} each</p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {[1, 2, 3].map(num => (
                       <SelectOption 
                         key={num} label={`${num} Video${num > 1 ? 's' : ''}`} value={num} currentValue={!customInputVisible[3] ? data.videos : -1} 
@@ -365,18 +381,18 @@ export default function Builder() {
                       label="Custom" value={true} currentValue={customInputVisible[3]} 
                       onClick={() => { setCustomInputVisible({...customInputVisible, 3: true}); updateData("videos", 0); }} icon={Sparkles}
                     />
-                    {customInputVisible[3] && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-2">
-                        <div className="glass-input rounded-2xl p-4 flex flex-col">
-                          <label className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Enter Number of Videos</label>
-                          <input 
-                            type="number" min="0" value={data.videos || ""} onChange={(e) => updateData("videos", parseInt(e.target.value) || 0)}
-                            className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-xl py-1 text-gray-900"
-                          />
-                        </div>
-                      </motion.div>
-                    )}
                   </div>
+                  {customInputVisible[3] && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-3">
+                      <div className="glass-input rounded-2xl p-3 flex flex-col">
+                        <label className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Enter Number of Videos</label>
+                        <input 
+                          type="number" min="0" value={data.videos || ""} onChange={(e) => updateData("videos", parseInt(e.target.value) || 0)}
+                          className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-base py-1 text-gray-900"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
 
@@ -384,13 +400,13 @@ export default function Builder() {
               {currentStep === 4 && (
                 <motion.div
                   key="step4" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4 }}
-                  className="absolute inset-0"
+                  className="absolute inset-0 overflow-y-auto overflow-x-hidden pr-1 pb-4"
                 >
-                  <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">
-                    How many Video Shoot Days do you need?
+                  <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug">
+                    How many Shoot Days?
                   </h2>
-                  <p className="text-xs text-[#a23957] font-mono mt-1.5 mb-6 bg-white/50 inline-block px-2 py-1 rounded-md">₹{prices.shootDays} per day</p>
-                  <div className="space-y-2.5">
+                  <p className="text-[10px] sm:text-xs text-[#a23957] font-mono mt-1 mb-4 bg-white/50 inline-block px-2 py-1 rounded-md">₹{prices.shootDays} per day</p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {[1, 2, 3].map(num => (
                       <SelectOption 
                         key={num} label={`${num} Day${num > 1 ? 's' : ''}`} value={num} currentValue={!customInputVisible[4] ? data.shootDays : -1} 
@@ -401,18 +417,18 @@ export default function Builder() {
                       label="Custom" value={true} currentValue={customInputVisible[4]} 
                       onClick={() => { setCustomInputVisible({...customInputVisible, 4: true}); updateData("shootDays", 0); }} icon={Sparkles}
                     />
-                    {customInputVisible[4] && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-2">
-                        <div className="glass-input rounded-2xl p-4 flex flex-col">
-                          <label className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Enter Number of Days</label>
-                          <input 
-                            type="number" min="0" value={data.shootDays || ""} onChange={(e) => updateData("shootDays", parseInt(e.target.value) || 0)}
-                            className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-xl py-1 text-gray-900"
-                          />
-                        </div>
-                      </motion.div>
-                    )}
                   </div>
+                  {customInputVisible[4] && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-3">
+                      <div className="glass-input rounded-2xl p-3 flex flex-col">
+                        <label className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Enter Number of Days</label>
+                        <input 
+                          type="number" min="0" value={data.shootDays || ""} onChange={(e) => updateData("shootDays", parseInt(e.target.value) || 0)}
+                          className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none font-display text-base py-1 text-gray-900"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
 
@@ -420,27 +436,27 @@ export default function Builder() {
               {currentStep === 5 && (
                 <motion.div
                   key="step5" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4 }}
-                  className="absolute inset-0"
+                  className="absolute inset-0 overflow-y-auto overflow-x-hidden pr-1 pb-4"
                 >
-                  <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">
-                    Which platforms should we manage?
+                  <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug">
+                    Which platforms?
                   </h2>
-                  <p className="text-xs text-gray-500 mt-1.5 mb-6">Select all that apply.</p>
-                  <div className="space-y-2.5 overflow-y-auto max-h-[300px] pr-1 pb-4">
+                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1 mb-4">Select all that apply.</p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <MultiSelectOption 
-                      label="Facebook Management" priceLabel={prices.facebook} isSelected={data.platforms.facebook} icon={Share2}
+                      label="Facebook" priceLabel={prices.facebook} isSelected={data.platforms.facebook} icon={Share2}
                       onClick={() => updateData("platforms", {...data.platforms, facebook: !data.platforms.facebook})}
                     />
                     <MultiSelectOption 
-                      label="Instagram Management" priceLabel={prices.instagram} isSelected={data.platforms.instagram} icon={Share2}
+                      label="Instagram" priceLabel={prices.instagram} isSelected={data.platforms.instagram} icon={Share2}
                       onClick={() => updateData("platforms", {...data.platforms, instagram: !data.platforms.instagram})}
                     />
                     <MultiSelectOption 
-                      label="YouTube Management" priceLabel={prices.youtube} isSelected={data.platforms.youtube} icon={Share2}
+                      label="YouTube" priceLabel={prices.youtube} isSelected={data.platforms.youtube} icon={Share2}
                       onClick={() => updateData("platforms", {...data.platforms, youtube: !data.platforms.youtube})}
                     />
                     <MultiSelectOption 
-                      label="Google Business Profile" priceLabel={prices.google} isSelected={data.platforms.google} icon={Share2}
+                      label="Google" priceLabel={prices.google} isSelected={data.platforms.google} icon={Share2}
                       onClick={() => updateData("platforms", {...data.platforms, google: !data.platforms.google})}
                     />
                   </div>
@@ -451,14 +467,14 @@ export default function Builder() {
               {currentStep === 6 && (
                 <motion.div
                   key="step6" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4 }}
-                  className="absolute inset-0"
+                  className="absolute inset-0 overflow-y-auto overflow-x-hidden pr-1 pb-4"
                 >
-                  <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">
-                    Do you want Influencer Marketing?
+                  <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug">
+                    Influencer Marketing?
                   </h2>
-                  <p className="text-xs text-gray-500 mt-1.5 mb-6">Does not add to base package price.</p>
-                  <div className="space-y-2.5">
-                    {["No", "₹5,000–₹7,000", "₹8,000–₹10,000", "₹10,000+"].map(opt => (
+                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1 mb-4">Does not add to base package price.</p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    {["No", "₹5k–₹7k", "₹8k–₹10k", "₹10k+"].map(opt => (
                       <SelectOption 
                         key={opt} label={opt} value={opt} currentValue={data.influencerBudget} 
                         onClick={() => updateData("influencerBudget", opt)} icon={Users}
@@ -472,13 +488,13 @@ export default function Builder() {
               {currentStep === 7 && (
                 <motion.div
                   key="step7" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4 }}
-                  className="absolute inset-0"
+                  className="absolute inset-0 overflow-y-auto overflow-x-hidden pr-1 pb-4"
                 >
-                  <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">
-                    Do you want Social Media Ads Management?
+                  <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug">
+                    Social Media Ads Management?
                   </h2>
-                  <p className="text-xs text-gray-500 mt-1.5 mb-6">Drive targeted leads directly to your business.</p>
-                  <div className="space-y-2.5">
+                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1 mb-4">Drive targeted leads directly to your business.</p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <SelectOption 
                       label="Yes" value={true} currentValue={data.adsManagement} 
                       onClick={() => updateData("adsManagement", true)} icon={Target}
@@ -487,21 +503,21 @@ export default function Builder() {
                       label="No" value={false} currentValue={data.adsManagement} 
                       onClick={() => updateData("adsManagement", false)} icon={Target}
                     />
-                    {data.adsManagement === true && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-2">
-                        <div className="glass-input rounded-2xl p-4 flex flex-col">
-                          <label className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Weekly Ad Budget (₹)</label>
-                          <div className="flex items-center text-xl font-display">
-                            <span className="text-gray-400 mr-2">₹</span>
-                            <input 
-                              type="number" min="0" placeholder="5000" value={data.weeklyAdBudget} onChange={(e) => updateData("weeklyAdBudget", e.target.value)}
-                              className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none w-full py-1 text-gray-900"
-                            />
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
                   </div>
+                  {data.adsManagement === true && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-3">
+                      <div className="glass-input rounded-2xl p-3 flex flex-col">
+                        <label className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Weekly Ad Budget (₹)</label>
+                        <div className="flex items-center text-xl font-display">
+                          <span className="text-gray-400 mr-2">₹</span>
+                          <input 
+                            type="number" min="0" placeholder="5000" value={data.weeklyAdBudget} onChange={(e) => updateData("weeklyAdBudget", e.target.value)}
+                            className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none w-full py-1 text-gray-900"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
 
