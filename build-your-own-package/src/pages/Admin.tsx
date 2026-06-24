@@ -103,7 +103,7 @@ export default function Admin() {
         <AmbientBackground />
         <div className="flex-grow flex flex-col items-center justify-center px-4 py-8 relative z-10 w-full max-w-lg mx-auto">
           <div className="text-center mb-8">
-            <img src="/logo.png" alt="Royal300 Logo" className="h-10 mx-auto mb-4 drop-shadow-sm" />
+            <img src="/logo.png" alt="Royal300 Logo" className="h-16 mx-auto mb-4 drop-shadow-sm" />
             <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-[1.1] drop-shadow-sm">
               Admin <br/><span className="text-[#a23957]">Portal</span>
             </h1>
@@ -136,7 +136,7 @@ export default function Admin() {
         {/* Left Sidebar (Desktop) */}
         <div className="w-full md:w-64 glass-container rounded-[2rem] sm:rounded-[2.5rem] p-6 flex flex-col shrink-0">
           <div className="mb-8 text-center md:text-left">
-            <img src="/logo.png" alt="Logo" className="h-8 mb-4 mx-auto md:mx-0" />
+            <img src="/logo.png" alt="Logo" className="h-12 mb-4 mx-auto md:mx-0" />
             <h2 className="font-display font-extrabold text-gray-900 text-xl leading-tight">Control <br/><span className="text-[#a23957]">Center</span></h2>
           </div>
           <nav className="flex md:flex-col space-x-2 md:space-x-0 md:space-y-3 overflow-x-auto pb-2 md:pb-0 mb-6 md:mb-0">
@@ -159,25 +159,31 @@ export default function Admin() {
         <div className="flex-grow glass-container rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 flex flex-col relative overflow-hidden min-h-[500px]">
           
           {activeTab === "prices" && (
-            <div className="w-full">
+            <div className="w-full h-full flex flex-col">
               <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug mb-6">Package Pricing</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                {Object.keys(prices).map(key => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 overflow-y-auto max-h-[60vh] pr-2">
+                {[
+                  "reels", "creatives", "videos", "shootDays", 
+                  "facebook", "instagram", "youtube", "google",
+                  "influencer_t1", "influencer_t2", "influencer_t3"
+                ].map(key => (
                   <div key={key} className="glass-input p-4 rounded-2xl flex flex-col">
-                    <label className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{key}</label>
+                    <label className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                      {key.replace("_", " ")} {key.startsWith("influencer") && "(e.g. 5000)"}
+                    </label>
                     <div className="flex items-center text-xl font-display">
                       <span className="text-gray-400 mr-2">₹</span>
                       <input 
                         type="number" 
-                        value={prices[key]} 
-                        onChange={e => setPrices({...prices, [key]: parseInt(e.target.value) || 0})}
+                        value={prices[key] ?? ""} 
+                        onChange={e => setPrices({...prices, [key]: e.target.value === "" ? 0 : parseInt(e.target.value)})}
                         className="bg-transparent border-b-2 border-gray-300 focus:border-[#a23957] outline-none w-full py-1 text-gray-900"
                       />
                     </div>
                   </div>
                 ))}
               </div>
-              <button onClick={savePrices} className="w-full sm:w-auto py-4 px-8 rounded-2xl glass-primary-button font-display font-extrabold text-base flex items-center justify-center space-x-2">
+              <button onClick={savePrices} className="w-full sm:w-auto py-4 px-8 rounded-2xl glass-primary-button font-display font-extrabold text-base flex items-center justify-center space-x-2 mt-auto">
                 <Check className="w-5 h-5" /> <span>Save Prices</span>
               </button>
             </div>
@@ -256,35 +262,54 @@ export default function Admin() {
       </div>
 
       {/* Details Modal */}
-      {selectedEnquiry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-md">
-          <div className="glass-container w-full max-w-2xl p-6 sm:p-10 rounded-[2.5rem] max-h-[90vh] overflow-y-auto relative shadow-2xl">
-            <button onClick={() => setSelectedEnquiry(null)} className="absolute top-6 right-6 p-2 bg-white/50 rounded-full hover:bg-white/80 transition-colors">
+      {selectedEnquiry && (() => {
+        let parsed = selectedEnquiry.details;
+        if (typeof parsed === "string") {
+          try { parsed = JSON.parse(parsed); } catch(e){}
+        }
+        if (typeof parsed === "string") {
+          try { parsed = JSON.parse(parsed); } catch(e){}
+        }
+
+        return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
+          <div className="glass-container w-full max-w-2xl p-6 sm:p-8 rounded-[2rem] max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
+            <button onClick={() => setSelectedEnquiry(null)} className="absolute top-5 right-5 p-2 bg-white/50 rounded-full hover:bg-white/80 transition-colors z-10">
               <X className="w-5 h-5 text-gray-800" />
             </button>
             
-            <h2 className="font-display text-3xl font-extrabold text-gray-900 mb-8">Package Details</h2>
+            <h2 className="font-display text-2xl font-extrabold text-gray-900 mb-6 border-b border-gray-200 pb-4">Package Request</h2>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-              <div className="glass-input p-5 rounded-2xl">
-                <p className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Customer Name</p>
-                <p className="font-display font-bold text-lg text-gray-900">{selectedEnquiry.name}</p>
+            <div className="overflow-y-auto pr-2 pb-6 space-y-6 flex-grow">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="glass-input p-4 rounded-xl">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Customer Name</p>
+                  <p className="font-display font-bold text-lg text-gray-900">{selectedEnquiry.name || "N/A"}</p>
+                </div>
+                <div className="glass-input p-4 rounded-xl">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Phone Number</p>
+                  <p className="font-mono font-medium text-lg text-[#a23957]">{selectedEnquiry.phone || "N/A"}</p>
+                </div>
               </div>
-              <div className="glass-input p-5 rounded-2xl">
-                <p className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Phone Number</p>
-                <p className="font-mono font-medium text-lg text-[#a23957]">{selectedEnquiry.phone}</p>
-              </div>
-            </div>
 
-            <h3 className="font-display font-bold text-xl text-gray-800 mb-4">Selections JSON</h3>
-            <div className="glass-input p-5 rounded-2xl overflow-x-auto">
-              <pre className="text-xs font-mono text-gray-700">
-                {JSON.stringify(selectedEnquiry.details, null, 2)}
-              </pre>
+              <div>
+                <h3 className="font-display font-bold text-sm text-gray-500 uppercase tracking-wider mb-3">Selections</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {Object.entries(parsed || {}).map(([key, val]) => (
+                    <div key={key} className="glass-input p-3 rounded-xl flex flex-col justify-center">
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">{key}</span>
+                      <span className="font-display text-sm font-semibold text-gray-900">
+                        {typeof val === 'object' && val !== null ? JSON.stringify(val) : String(val)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
     </div>
   );

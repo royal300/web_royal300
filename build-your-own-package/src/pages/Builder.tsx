@@ -218,8 +218,8 @@ export default function Builder() {
       <div className="flex-grow flex flex-col items-center justify-center px-4 py-8 relative z-10 w-full max-w-2xl mx-auto">
         
         {/* Title Header */}
-        <div className="text-center mb-8">
-          <img src="/logo.png" alt="Royal300 Logo" className="h-10 mx-auto mb-4 drop-shadow-sm" />
+        <div className="text-center mb-6">
+          <img src="/logo.png" alt="Royal300 Logo" className="h-14 sm:h-16 mx-auto mb-3 drop-shadow-sm" />
           <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-[1.1] drop-shadow-sm">
             Build Your <br/>
             <span className="text-[#a23957]">Own Package</span>
@@ -227,7 +227,7 @@ export default function Builder() {
         </div>
 
         {/* The Glass Container for the Form */}
-        <div className="w-full glass-container rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 flex flex-col relative overflow-hidden min-h-[420px] sm:min-h-[500px]">
+        <div className="w-full glass-container rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 flex flex-col relative overflow-hidden min-h-[380px] sm:min-h-[440px]">
           
           {/* Progress Bar inside the glass container */}
           {currentStep < 8 && (
@@ -464,25 +464,33 @@ export default function Builder() {
               )}
 
               {/* SCREEN 7: INFLUENCER MARKETING */}
-              {currentStep === 6 && (
-                <motion.div
-                  key="step6" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4 }}
-                  className="absolute inset-0 overflow-y-auto overflow-x-hidden pr-1 pb-4"
-                >
-                  <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug">
-                    Influencer Marketing?
-                  </h2>
-                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1 mb-4">Does not add to base package price.</p>
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    {["No", "₹5k–₹7k", "₹8k–₹10k", "₹10k+"].map(opt => (
-                      <SelectOption 
-                        key={opt} label={opt} value={opt} currentValue={data.influencerBudget} 
-                        onClick={() => updateData("influencerBudget", opt)} icon={Users}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-              )}
+              {currentStep === 6 && (() => {
+                const infT1 = prices.influencer_t1 || 5000;
+                const infT2 = prices.influencer_t2 || 8000;
+                const infT3 = prices.influencer_t3 || 10000;
+                const format = (v: number) => `₹${v/1000}k`;
+                const options = ["No", `${format(infT1)}–${format(infT2)}`, `${format(infT2)}–${format(infT3)}`, `${format(infT3)}+`];
+
+                return (
+                  <motion.div
+                    key="step6" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4 }}
+                    className="absolute inset-0 overflow-y-auto overflow-x-hidden pr-1 pb-4"
+                  >
+                    <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug">
+                      Influencer Marketing?
+                    </h2>
+                    <p className="text-[10px] sm:text-xs text-gray-500 mt-1 mb-4">Does not add to base package price.</p>
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                      {options.map(opt => (
+                        <SelectOption 
+                          key={opt} label={opt} value={opt} currentValue={data.influencerBudget} 
+                          onClick={() => updateData("influencerBudget", opt)} icon={Users}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                );
+              })()}
 
               {/* SCREEN 8: ADS MANAGEMENT */}
               {currentStep === 7 && (
@@ -525,51 +533,49 @@ export default function Builder() {
               {currentStep === 8 && (
                 <motion.div
                   key="step8" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.4 }}
-                  className="absolute inset-0 overflow-y-auto pb-6"
+                  className="absolute inset-0 overflow-y-auto pb-4 pr-1"
                 >
-                  <div className="flex flex-col items-center justify-center mb-6 text-center">
-                    <div className="w-14 h-14 rounded-full bg-white/40 flex items-center justify-center text-[#a23957] mb-4 shadow-sm border border-white/50">
-                      <Sparkles className="w-7 h-7" />
+                  <div className="flex flex-col items-center justify-center mb-4 text-center">
+                    <div className="w-12 h-12 rounded-full bg-white/40 flex items-center justify-center text-[#a23957] mb-2 shadow-sm border border-white/50">
+                      <Sparkles className="w-6 h-6" />
                     </div>
-                    <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">
+                    <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 leading-snug">
                       Your Custom Package
                     </h2>
-                    <p className="text-xs sm:text-sm text-gray-500 mt-1">Hey {data.name}, here is your tailored blueprint.</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 mt-1">Hey {data.name}, here is your tailored blueprint.</p>
                   </div>
                   
-                  <div className="glass-input p-5 sm:p-6 rounded-3xl mb-6">
-                    <h3 className="font-mono text-[10px] sm:text-xs font-bold text-[#a23957] uppercase tracking-wider mb-4 border-b border-gray-300/50 pb-2">Estimated Monthly Cost</h3>
-                    <div className="flex items-baseline space-x-2 text-gray-900 mb-4">
-                      <span className="text-xl font-bold">₹</span>
+                  <div className="glass-input p-4 rounded-2xl mb-4">
+                    <h3 className="font-mono text-[10px] font-bold text-[#a23957] uppercase tracking-wider mb-2 border-b border-gray-300/50 pb-1.5">Estimated Monthly Cost</h3>
+                    <div className="flex items-baseline space-x-1.5 text-gray-900 mb-3 border-b border-gray-300/50 pb-3">
+                      <span className="text-lg font-bold">₹</span>
                       <motion.span 
                         initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 100 }}
-                        className="text-4xl sm:text-5xl font-black font-display tracking-tight"
+                        className="text-3xl sm:text-4xl font-black font-display tracking-tight"
                       >
                         {calculateTotal().toLocaleString()}
                       </motion.span>
                     </div>
                     
-                    <div className="space-y-2 mt-4 text-[11px] sm:text-xs text-gray-700 font-medium">
-                      {data.reels > 0 && <div className="flex justify-between"><span>{data.reels} Reels</span><span>₹{data.reels * prices.reels}</span></div>}
-                      {data.creatives > 0 && <div className="flex justify-between"><span>{data.creatives} Creatives</span><span>₹{data.creatives * prices.creatives}</span></div>}
-                      {data.videos > 0 && <div className="flex justify-between"><span>{data.videos} Long Videos</span><span>₹{data.videos * prices.videos}</span></div>}
-                      {data.shootDays > 0 && <div className="flex justify-between"><span>{data.shootDays} Shoot Days</span><span>₹{data.shootDays * prices.shootDays}</span></div>}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[9px] sm:text-[10px] text-gray-700 font-medium">
+                      {data.reels > 0 && <div className="flex flex-col"><span className="text-gray-500">{data.reels} Reels</span><span className="font-bold text-[#a23957]">₹{data.reels * prices.reels}</span></div>}
+                      {data.creatives > 0 && <div className="flex flex-col"><span className="text-gray-500">{data.creatives} Creatives</span><span className="font-bold text-[#a23957]">₹{data.creatives * prices.creatives}</span></div>}
+                      {data.videos > 0 && <div className="flex flex-col"><span className="text-gray-500">{data.videos} Long Videos</span><span className="font-bold text-[#a23957]">₹{data.videos * prices.videos}</span></div>}
+                      {data.shootDays > 0 && <div className="flex flex-col"><span className="text-gray-500">{data.shootDays} Shoot Days</span><span className="font-bold text-[#a23957]">₹{data.shootDays * prices.shootDays}</span></div>}
                       
-                      <div className="pt-2 border-t border-gray-300/50 mt-2">
-                        {data.platforms.facebook && <div className="flex justify-between"><span>FB Management</span><span>₹{prices.facebook}</span></div>}
-                        {data.platforms.instagram && <div className="flex justify-between"><span>IG Management</span><span>₹{prices.instagram}</span></div>}
-                        {data.platforms.youtube && <div className="flex justify-between"><span>YT Management</span><span>₹{prices.youtube}</span></div>}
-                        {data.platforms.google && <div className="flex justify-between"><span>Google Profile</span><span>₹{prices.google}</span></div>}
-                      </div>
+                      {data.platforms.facebook && <div className="flex flex-col"><span className="text-gray-500">FB Mgmt</span><span className="font-bold text-[#a23957]">₹{prices.facebook}</span></div>}
+                      {data.platforms.instagram && <div className="flex flex-col"><span className="text-gray-500">IG Mgmt</span><span className="font-bold text-[#a23957]">₹{prices.instagram}</span></div>}
+                      {data.platforms.youtube && <div className="flex flex-col"><span className="text-gray-500">YT Mgmt</span><span className="font-bold text-[#a23957]">₹{prices.youtube}</span></div>}
+                      {data.platforms.google && <div className="flex flex-col"><span className="text-gray-500">Google Profile</span><span className="font-bold text-[#a23957]">₹{prices.google}</span></div>}
                     </div>
                   </div>
 
                   <button
                     disabled={isSubmitting}
                     onClick={submitFinal}
-                    className="w-full py-4 rounded-2xl glass-primary-button font-display font-extrabold text-base flex items-center justify-center space-x-2"
+                    className="w-full py-3.5 rounded-2xl glass-primary-button font-display font-extrabold text-sm sm:text-base flex items-center justify-center space-x-2"
                   >
-                    <span>{isSubmitting ? "Submitting..." : "🚀 Get My Custom Proposal"}</span>
+                    <span>{isSubmitting ? "Submitting..." : "🚀 Request Custom Proposal"}</span>
                   </button>
                 </motion.div>
               )}
