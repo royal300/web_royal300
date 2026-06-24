@@ -1,0 +1,6 @@
+{
+  "name": "Build Your Own Package",
+  "description": "An interactive customized social media package builder survey with real-time AI-generated platform playbooks and content plans.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
